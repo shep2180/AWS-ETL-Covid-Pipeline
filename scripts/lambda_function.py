@@ -10,7 +10,7 @@ from module_etl import get_data, extract_nyt, extract_jh, join_data, load_data
 
 # setting up DynamoDB
 dynamodb = boto3.resource('dynamodb')
-table = dynamodb.Table('testCovidData')
+table = dynamodb.Table('Daily_COVID_Data')
 
 #setting up SNS
 notifier = boto3.client('sns')
@@ -32,7 +32,6 @@ def lambda_handler(event, context):
         'rows_updated': rows_updated,
     }
     
-    # ISSUE - subscribers not receiving updates, unless it just takes a while
     notification = notifier.publish(
         TargetArn = notifier_arn,
         Message = json.dumps({'default': json.dumps(result)}),

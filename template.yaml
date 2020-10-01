@@ -1,0 +1,35 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Daily COVID-19 ETL Pipeline Template
+
+Resources:
+
+  DynamoDBTable: #was TestDynamo
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      PrimaryKey:
+        Name: id
+        Type: String
+      TableName: Daily_COVID_Data
+            
+  HelloWorldFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: Lambda/
+      Handler: app.lambda_handler
+      Runtime: python3.8
+      Policies:
+        - AmazonDynamoDBFullAccess
+      Events:
+        HelloWorld:
+          Type: Api
+          Properties:
+            RestApiId: !Ref TestAPIGateway
+            Path: /testsamapi
+            Method: get
+
+Outputs:
+  TestAPIGateway:
+    Description: "API Gateway endpoint URL for Prod stage for Hello World function"
+    Value: !Sub "https://${TestAPIGateway}.execute-api.${AWS::Region}.amazonaws.com/Prod/testsamapi/"
