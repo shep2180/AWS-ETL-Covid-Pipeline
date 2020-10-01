@@ -1,0 +1,47 @@
+# necessary libraries, boto3 is for AWS resources
+import csv
+import os
+import json
+import boto3
+
+# imports functions from ETL module I created
+
+from module_etl import get_data, extract_nyt, extract_jh, join_data, load_data
+
+# setting up DynamoDB
+dynamodb = boto3.resource('dynamodb')
+table = dynamodb.Table('testCovidData')
+
+#setting up SNS
+notifier = boto3.client('sns')
+notifier_arn = 'arn:aws:sns:us-east-1:134990483293:dailyCovidData'
+
+def lambda_handler(event, context):
+    
+    # ETL process
+    nyt_data, nyt_exceptions = extract_nyt(get_data('https://raw.githubusercontent.com/nytimes/covid-19-data/master/us.csv'))
+    jh_data, jh_exceptions = extract_jh(get_data('https://raw.githubusercontent.com/datasets/covid-19/master/data/time-series-19-covid-combined.csv'))
+    joined_data = join_data(nyt_data, jh_data)
+    rows_updated, load_exceptions = load_data(joined_data, table)
+    
+    # SNS notification
+    result = {
+        'nyt_exceptions': len(nyt_exceptions),
+        'jh_exceptions': len(jh_exceptions),
+        'load_exceptions': len(load_exceptions),
+        'rows_updated': rows_updated,
+    }
+    
+    # ISSUE - subscribers not receiving updates, unless it just takes a while
+    notification = notifier.publish(
+        TargetArn = notifier_arn,
+        Message = json.dumps({'default': json.dumps(result)}),
+        MessageStructure = 'json'
+    )
+    
+    # Lambda return
+    return {
+        'statusCode': 200,
+        'body': load_exceptions,
+    }
+
