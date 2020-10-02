@@ -10,11 +10,12 @@ from module_etl import get_data, extract_nyt, extract_jh, join_data, load_data
 
 # setting up DynamoDB
 dynamodb = boto3.resource('dynamodb')
-table = dynamodb.Table('Daily_COVID_Data')
+table_name = os.environ['TABLE_NAME']
+table = dynamodb.Table(table_name)
 
-#setting up SNS
+# setting up SNS
 notifier = boto3.client('sns')
-notifier_arn = 'arn:aws:sns:us-east-1:134990483293:dailyCovidData'
+notifier_arn = os.environ['NOTIFIER_ARN']
 
 def lambda_handler(event, context):
     
@@ -41,6 +42,6 @@ def lambda_handler(event, context):
     # Lambda return
     return {
         'statusCode': 200,
-        'body': load_exceptions,
+        'body': notification,
     }
 
