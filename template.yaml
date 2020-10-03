@@ -18,6 +18,16 @@ Resources:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1
       TableName: Daily_Covid_Data
+  Subscription:
+    Type: 'AWS::SNS::Subscription'
+    Properties:
+      Endpoint: !GetAtt
+        - Function
+        - Arn
+      Protocol: lambda
+      TopicArn: !Ref Topic
+    DependsOn:
+      - Function
   Function:
     Type: 'AWS::Serverless::Function'
     Properties:
@@ -31,18 +41,6 @@ Resources:
         Variables:
           TABLE_NAME: !Select [1, !Split ['/', !GetAtt DynamoDBTable.Arn]]
           NOTIFIER_ARN: !Ref Topic
-    DependsOn:
-      - LambdaExecutionRole
-  Subscription:
-    Type: 'AWS::SNS::Subscription'
-    Properties:
-      Endpoint: !GetAtt
-        - Function
-        - Arn
-      Protocol: lambda
-      TopicArn: !Ref Topic
-    DependsOn:
-      - Function
   LambdaInvokePermission:
     Type: 'AWS::Lambda::Permission'
     Properties:

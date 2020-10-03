@@ -2,9 +2,9 @@ version = 0.1
 [default]
 [default.deploy]
 [default.deploy.parameters]
-stack_name = "TestSamCovidStack"
-s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-dt4bchl9wdyo"
-s3_prefix = "TestSamCovidStack"
+stack_name = "TestingETL"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-10op6h9apbynv"
+s3_prefix = "TestingETL"
 region = "us-west-2"
 confirm_changeset = true
 capabilities = "CAPABILITY_IAM"
